@@ -1,0 +1,43 @@
+{
+  "masterKey": {
+    "name": "master",
+    "value": "Mvn8PyWZxrZtEm6ie19e/6vaja/f3IRSHg2iXvUypnPivvwIDChMjg==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "rXPaGefS6SyKLogVD3xBLYkW4AX0yK8uPler2/OwH7StzxRvuCpz1Q==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [],
+  "hostName": "localhost:7071",
+  "instanceId": "000000000000000000000000190BFDCB",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}{
+  "masterKey": {
+    "name": "master",
+    "value": "Mvn8PyWZxrZtEm6ie19e/6vaja/f3IRSHg2iXvUypnPivvwIDChMjg==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "rXPaGefS6SyKLogVD3xBLYkW4AX0yK8uPler2/OwH7StzxRvuCpz1Q==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [
+    {
+      "name": "workflow_extension",
+      "value": "eQqatmiCuyvFELddb//vIavQofvXNDPyl5WJEwB7NVaYfxiRVZYGmw==",
+      "encrypted": false
+    }
+  ],
+  "hostName": "localhost:7071",
+  "instanceId": "000000000000000000000000190BFDCB",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}
