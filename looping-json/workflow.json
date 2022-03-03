@@ -1,0 +1,198 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "HTTP": {
+                "type": "Http",
+                "inputs": {
+                    "method": "POST",
+                    "uri": "https://cust-app.azurewebsites.net/api/customer?code=/BaQg3chU2svMoP2F1fDgiVJxTc45bkkbNCbp9J0HaoCwAGFbUqr0w==",
+                    "body": {
+                        "id": "123"
+                    }
+                },
+                "runAfter": {
+                    "Deletes_a_Blob_from_Azure_Storage": [
+                        "Succeeded",
+                        "TIMEDOUT",
+                        "SKIPPED",
+                        "FAILED"
+                    ]
+                },
+                "runtimeConfiguration": {
+                    "requestOptions": {
+                        "timeout": "PT20S"
+                    }
+                }
+            },
+            "Initialize_variable": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "file_output",
+                            "type": "array",
+                            "value": []
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "HTTP": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Parse_JSON": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@body('HTTP')",
+                    "schema": {
+                        "items": {
+                            "properties": {
+                                "CustomerID": {
+                                    "type": "integer"
+                                },
+                                "CustomerName": {
+                                    "type": "string"
+                                },
+                                "Delivery": {
+                                    "properties": {
+                                        "AddressLine1": {
+                                            "type": "string"
+                                        },
+                                        "AddressLine2": {
+                                            "type": "string"
+                                        },
+                                        "PostalCode": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "FaxNumber": {
+                                    "type": "string"
+                                },
+                                "PhoneNumber": {
+                                    "type": "string"
+                                },
+                                "WebsiteURL": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "CustomerID",
+                                "CustomerName",
+                                "PhoneNumber",
+                                "FaxNumber",
+                                "WebsiteURL",
+                                "Delivery"
+                            ],
+                            "type": "object"
+                        },
+                        "type": "array"
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variable": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "For_each": {
+                "type": "Foreach",
+                "foreach": "@body('Parse_JSON')",
+                "actions": {
+                    "Compose": {
+                        "type": "Compose",
+                        "inputs": {
+                            "CustomerID": "@items('For_each')['CustomerID']",
+                            "Name": "@items('For_each')['CustomerName']"
+                        },
+                        "runAfter": {}
+                    },
+                    "Append_to_array_variable": {
+                        "type": "AppendToArrayVariable",
+                        "inputs": {
+                            "name": "file_output",
+                            "value": "@outputs('Compose')"
+                        },
+                        "runAfter": {
+                            "Compose": [
+                                "Succeeded"
+                            ]
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Parse_JSON": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "@variables('file_output')"
+                },
+                "runAfter": {
+                    "Uploads_a_Blob_to_Azure_Storage": [
+                        "Succeeded",
+                        "FAILED",
+                        "TIMEDOUT",
+                        "SKIPPED"
+                    ]
+                }
+            },
+            "Deletes_a_Blob_from_Azure_Storage": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "containerName": "logicapp",
+                        "blobName": "customer2.json"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureBlob",
+                        "operationId": "deleteBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    },
+                    "retryPolicy": {
+                        "type": "none"
+                    }
+                },
+                "runAfter": {}
+            },
+            "Uploads_a_Blob_to_Azure_Storage": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "containerName": "logicapp",
+                        "blobName": "customer2.json",
+                        "content": "@variables('file_output')"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureBlob",
+                        "operationId": "uploadBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {
+                    "For_each": [
+                        "Succeeded"
+                    ]
+                }
+            }
+        },
+        "triggers": {
+            "manual": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateless"
+}
